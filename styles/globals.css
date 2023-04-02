@@ -4,6 +4,7 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+    background-color: rgb(6, 163, 171);
 }
 
 a {
@@ -14,13 +15,140 @@ a {
 * {
   box-sizing: border-box;
 }
+/* styling form */
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-  body {
-    color: white;
-    background: black;
-  }
+form{
+width: 50%;
+height: auto;
+margin-top: 4%;
+border: 2px solid rgb(255, 0, 0);
+box-shadow: 2px 2px 30px 3px  rgb(188, 188, 188);
+margin-left: 25%;
+background-color:rgb(255, 255, 255);
 }
+form input{
+text-align: center;
+width: 80%;
+padding: 2% 3%;
+margin-top: 10%;
+font-size: 30px;
+margin-left: 10%;
+border: 3px solid rgba(109, 109, 109, 0.937);
+
+}
+form input:focus{
+color: rgb(255, 60, 0);
+outline: none;
+border: 3px solid rgba(255, 2, 2, 0.937);
+}
+
+form button{
+width: 80%;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    margin: 20px;
+    margin-bottom: 10%;
+    height: auto;
+    text-align:center;
+    border: none;
+    background-size: 300% 100%;
+margin-left: 10%;
+padding:3% 10%;
+font-size: 20px;
+    border-radius: 50px;
+    moz-transition: all .4s ease-in-out;
+    -o-transition: all .4s ease-in-out;
+    -webkit-transition: all .4s ease-in-out;
+    transition: all .4s ease-in-out;
+}
+.disable{
+cursor:not-allowed;
+}
+.btn-hover:hover {
+    background-position: 100% 0;
+    moz-transition: all .4s ease-in-out;
+    -o-transition: all .4s ease-in-out;
+    -webkit-transition: all .4s ease-in-out;
+    transition: all .4s ease-in-out;
+}
+.btn-hover:focus {
+    outline: none;
+}
+
+.btn-hover.color-1 {
+    background-image: linear-gradient(to right, #25aae1, #40e495, #30dd8a, #2bb673);
+    box-shadow: 0 4px 15px 0 rgba(49, 196, 190, 0.75);
+}
+
+/* disable arrow from input button */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+#message{
+text-align: center;
+font-size: 20px;
+color: rgb(63, 63, 63);
+padding-top: 2%;
+}
+/* card style */
+
+.card{
+width: 96%;
+margin-left:6%;
+display: flex;
+ flex-wrap: wrap;
+}
+
+.card li{
+margin-left: 3%;
+display: flex;
+}
+
+#ccavenueImage{
+width: 80px;
+height: 80px;
+margin-top: 20%;
+}
+
+#razorpayImg{
+width: 80px;
+margin-top: 50%;
+height: 40px;
+}
+
+
+#paypalImg{
+width: 80px;
+margin-top: 44%;
+height: 50px;
+}
+
+#stripeImg{
+width: 70px;
+margin-top: 56%;
+height: 36px;
+}
+
+#paytmImg{
+width: 80px;
+margin-top: 44%;
+height: 50px;
+}
+
+#payumoney{
+margin-top: -5%;
+}
+#payumoneyImg{
+width: 80px;
+height: 80px;
+}
+

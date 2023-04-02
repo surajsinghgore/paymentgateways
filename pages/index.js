@@ -1,69 +1,270 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
-
+import Head from "next/head";
+import Script from "next/script";
+import { useState } from "react";
+import styles from "../styles/Home.module.css";
+import { loadStripe } from "@stripe/stripe-js";
 export default function Home() {
+  const [amount, setAmount] = useState(0);
+  const [stateManage, setStateManage] = useState(false);
+  const [product, setProduct] = useState({
+    name: "Go FullStack with KnowledgeHut",
+    price: 0,
+    productOwner: "KnowledgeHut",
+    description:
+      "This beginner-friendly Full-Stack Web Development Course is offered online in blended learning mode, and also in an on-demand self-paced format.",
+    quantity: 1,
+  });
+
+  // amount get from input box
+  const inputValueChange = (e) => {
+    setAmount(e.target.value);
+    product.price = e.target.value;
+    {
+      e.target.value > 0 ? setStateManage(true) : setStateManage(false);
+    }
+  };
+  // stripe payment request api
+  const makePaymentStripe = async () => {
+    setStateManage(false);
+    const stripe = await loadStripe(
+      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+    );
+    const body = { product };
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/stripe`,
+      {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(body),
+      }
+    );
+    setStateManage(true);
+
+    const session = await response.json();
+    localStorage.setItem("token", session.id);
+    console.log(session);
+    const result = await stripe.redirectToCheckout({
+      sessionId: session.id,
+    });
+    console.log(result);
+
+    if (result.error) {
+      console.log(result.error);
+    }
+  };
+
+  // make payment using razorpay
+  const makeRazorPayment = async (amounts) => {
+    // creating a new order
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/RazorPay`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ amount: amounts }),
+    });
+    const result = await res.json();
+
+    if (!result) {
+      alert("Server error. Are you online?");
+      return;
+    }
+
+    // Getting the order details back
+    const { amount, id, currency } = result;
+    console.log(id);
+    const options = {
+      key: "rzp_test_IUolk6jDznYfGU", // Enter the Key ID generated from the Dashboard
+      amount: amount.toString(),
+      currency: currency,
+      name: "Soumya Corp.",
+      description: "Test Transaction",
+      image:
+        "https://res.cloudinary.com/dnxv21hr0/image/upload/v1679195234/with_out_bg_-_Copy_oz607u.png",
+      order_id: id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+      // only when successfully payment
+      handler: async function (response) {
+        const data = {
+          orderId: id,
+          razorpayPaymentId: response.razorpay_order_id,
+          razorpayOrderId: response.razorpay_payment_id,
+          razorpaySignature: response.razorpay_signature,
+        };
+
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/RazorPaySuccess`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          }
+        );
+        const result1 = await res.json();
+
+        console.log(result1);
+        // alert(result1.data.msg);
+      },
+      prefill: {
+        name: "Soumya Dey",
+        email: "SoumyaDey@example.com",
+        contact: "9999999999",
+      },
+      notes: {
+        address: "Soumya Dey Corporate Office",
+      },
+      theme: {
+        color: "#61dafb",
+      },
+    };
+
+    const paymentObject = new window.Razorpay(options);
+
+    paymentObject.open();
+    // handling if failure occure in payment
+    paymentObject.on("payment.failed", function (response) {
+      // alert(response.error.code);
+      // alert(response.error.description);
+      // alert(response.error.source);
+      // alert(response.error.step);
+      // alert(response.error.reason);
+      // alert(response.error.metadata.order_id);
+      // alert(response.error.metadata.payment_id);
+      alert("payment failed");
+    });
+  };
+  // onsubmit request from button
+  const check = (e) => {
+    let checkboxcheckvalue;
+    e.preventDefault();
+    // fetching radio button option selected by user
+    let valueInCheckBox = document.getElementsByName("paymentMethod");
+    for (let i = 0; i < valueInCheckBox.length; i++) {
+      if (valueInCheckBox[i].checked) {
+        checkboxcheckvalue = valueInCheckBox[i].value;
+      }
+    }
+    // check wheather any payment method is selected or not
+    if (checkboxcheckvalue == undefined) {
+      alert("please select any payment method");
+      return;
+    }
+
+    // check weather amount is not below 0 or 0
+    if (stateManage) {
+      // stripe payment initiate
+      if (checkboxcheckvalue == "stripe") {
+        makePaymentStripe();
+      } else if (checkboxcheckvalue == "razorpay") {
+        makeRazorPayment(amount);
+      }
+    } else {
+      alert("Please Select amount");
+    }
+  };
+
   return (
     <div className={styles.container}>
       <Head>
-        <title>Create Next App</title>
-        <meta name="description" content="Generated by create next app" />
-        <link rel="icon" href="/favicon.ico" />
+        <title>DONATE TO PRP WEBSITE</title>
+        <meta name="description" content="DONATE TO PRP WEBSITE" />
+        <link rel="icon" href="/favicon.png" />
       </Head>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+      <form onSubmit={check}>
+        <input
+          type="number"
+          name="amount"
+          id="amount"
+          placeholder="Enter Amount"
+          value={amount}
+          onChange={inputValueChange}
+        />
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+        {/* cards option */}
+        <p id="message">Select any gateway for payment</p>
+        <div className="card">
+          <li>
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="ccAvenue"
+              id="ccAvenue"
+            />
+            <label htmlFor="ccAvenue">
+              <img src="ccavenue.png" alt="ccavenue" id="ccavenueImage" />
+            </label>
+          </li>
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+          <li>
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="razorpay"
+              id="razorpay"
+            />
+            <label htmlFor="razorpay">
+              <img src="razorpay.png" alt="razorpay" id="razorpayImg" />
+            </label>
+          </li>
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+          <li>
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="paypal"
+              id="paypal"
+            />
+            <label htmlFor="paypal">
+              <img src="paypal.png" alt="paypal" id="paypalImg" />
+            </label>
+          </li>
+          <li>
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="stripe"
+              id="stripe"
+            />
+            <label htmlFor="stripe">
+              <img src="stripe.png" alt="stripe" id="stripeImg" />
+            </label>
+          </li>
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+          <li>
+            <input type="radio" name="paymentMethod" value="paytm" id="paytm" />
+            <label htmlFor="paytm">
+              <img src="paytm.png" alt="paytm" id="paytmImg" />
+            </label>
+          </li>
 
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+          <li>
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="payumoney"
+              id="payumoney"
+            />
+            <label htmlFor="payumoney">
+              <img src="payumoney.png" alt="payumoney" id="payumoneyImg" />
+            </label>
+          </li>
         </div>
-      </main>
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
+        {/* button */}
+        {stateManage ? (
+          <button className="btn-hover color-1" onClick={check}>
+            Donate Now
+          </button>
+        ) : (
+          <button className="btn-hover color-1 disable">Donate Now</button>
+        )}
+      </form>
     </div>
-  )
+  );
 }
