@@ -2,9 +2,19 @@ import Head from "next/head";
 import Script from "next/script";
 import { useState } from "react";
 import styles from "../styles/Home.module.css";
+
 import { loadStripe } from "@stripe/stripe-js";
+ let d = new Date();
+    // generate token
+    let TokenId =
+      Math.floor(Math.random() * 1000000000000000 + 1) +
+      d.getDate() +
+      d.getMonth() +
+      d.getFullYear();
+   
 export default function Home() {
   const [amount, setAmount] = useState(0);
+  const [orderID, setOrderId] = useState(0);
   const [stateManage, setStateManage] = useState(false);
   const [product, setProduct] = useState({
     name: "Go FullStack with KnowledgeHut",
@@ -138,6 +148,60 @@ export default function Home() {
       alert("payment failed");
     });
   };
+
+  // make ccavenue payment integrate
+  const makeCcAvenue = async (amounts) => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/CcAvenue`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ amount: amounts }),
+    });
+    const result = await res.json();
+  };
+  // make paytm payment
+  const makePaytmPayment = async (amounts) => {
+   
+    let ress = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/PaytmPreTransaction`,
+      {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({
+          orderId: TokenId,
+          amount: amounts,
+        }),
+      }
+    );
+    let datas = await ress.json();
+    console.log(datas);
+    //               // setOrderId(datas.token)
+    // var config = {
+    //          "root": "",
+    //          "flow": "DEFAULT",
+    //          "data": {
+    //           "orderId": TokenId,
+    //           "token": datas.body.txnToken,
+    //           "tokenType": "TXN_TOKEN",
+    //           "amount":amounts
+    //          },
+    //          "handler": {
+    //             "notifyMerchant": function(eventName,data){
+    //               console.log(eventName,data)
+    //             }
+    //           }
+    //         };
+    //               window.Paytm.CheckoutJS.init(config).then(function onSuccess() {
+
+    // window.Paytm.CheckoutJS.invoke();
+    // }).catch(function onError(error){
+    // console.log("error => ",error);
+    // });
+  };
+
   // onsubmit request from button
   const check = (e) => {
     let checkboxcheckvalue;
@@ -162,6 +226,10 @@ export default function Home() {
         makePaymentStripe();
       } else if (checkboxcheckvalue == "razorpay") {
         makeRazorPayment(amount);
+      } else if (checkboxcheckvalue == "ccAvenue") {
+        makeCcAvenue(amount);
+      } else if (checkboxcheckvalue == "paytm") {
+        makePaytmPayment(amount);
       }
     } else {
       alert("Please Select amount");
@@ -174,8 +242,18 @@ export default function Home() {
         <title>DONATE TO PRP WEBSITE</title>
         <meta name="description" content="DONATE TO PRP WEBSITE" />
         <link rel="icon" href="/favicon.png" />
+        <meta
+          name="viewport"
+          content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0"
+        />
       </Head>
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+
+      {/* paytm script */}
+    <Script
+          src={`https://securegw-stage.paytm.in/theia/api/v1/initiateTransaction?mid=${process.env.NEXT_PUBLIC_PAYTM_MERCHANT_ID}&orderId=${TokenId}`}
+          strategy="beforeInteractive"
+        />
+
       <form onSubmit={check}>
         <input
           type="number"
