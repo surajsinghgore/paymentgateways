@@ -33,8 +33,8 @@ export default async function handler(req, res) {
           },
         ],
         mode: "payment",
-        success_url: `http://localhost:3000/StripeSuccess`,
-        cancel_url: "http://localhost:3000/StripeCancel",
+        success_url: `https://paymentgateways.onrender.com/StripeSuccess`,
+        cancel_url: "https://paymentgateways.onrender.com/StripeCancel",
       });
 
       res.json({ id: session.id, session });
