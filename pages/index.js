@@ -2,7 +2,7 @@ import Head from "next/head";
 import Script from "next/script";
 import { useState } from "react";
 import styles from "../styles/Home.module.css";
-
+// import Razorpay from 'razorpay';
 import { loadStripe } from "@stripe/stripe-js";
  let d = new Date();
     // generate token
@@ -13,8 +13,7 @@ import { loadStripe } from "@stripe/stripe-js";
       d.getFullYear();
    
 export default function Home() {
-  const [amount, setAmount] = useState(0);
-  const [orderID, setOrderId] = useState(0);
+  const [amount, setAmount] = useState();
   const [stateManage, setStateManage] = useState(false);
   const [product, setProduct] = useState({
     name: "Go FullStack with KnowledgeHut",
@@ -115,9 +114,9 @@ export default function Home() {
             body: JSON.stringify(data),
           }
         );
-        const result1 = await res.json();
+         await res.json();
 
-        console.log(result1);
+
         // alert(result1.data.msg);
       },
       prefill: {
@@ -138,7 +137,7 @@ export default function Home() {
     paymentObject.open();
     // handling if failure occure in payment
     paymentObject.on("payment.failed", function (response) {
-      // alert(response.error.code);
+      alert(response.error.code);
       // alert(response.error.description);
       // alert(response.error.source);
       // alert(response.error.step);
@@ -149,17 +148,7 @@ export default function Home() {
     });
   };
 
-  // make ccavenue payment integrate
-  const makeCcAvenue = async (amounts) => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/CcAvenue`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ amount: amounts }),
-    });
-    const result = await res.json();
-  };
+ 
   // make paytm payment
   const makePaytmPayment = async (amounts) => {
    
@@ -176,30 +165,30 @@ export default function Home() {
         }),
       }
     );
-    let datas = await ress.json();
-    console.log(datas);
-    //               // setOrderId(datas.token)
-    // var config = {
-    //          "root": "",
-    //          "flow": "DEFAULT",
-    //          "data": {
-    //           "orderId": TokenId,
-    //           "token": datas.body.txnToken,
-    //           "tokenType": "TXN_TOKEN",
-    //           "amount":amounts
-    //          },
-    //          "handler": {
-    //             "notifyMerchant": function(eventName,data){
-    //               console.log(eventName,data)
-    //             }
-    //           }
-    //         };
-    //               window.Paytm.CheckoutJS.init(config).then(function onSuccess() {
+    let txnToken = await ress.json();
 
-    // window.Paytm.CheckoutJS.invoke();
-    // }).catch(function onError(error){
-    // console.log("error => ",error);
-    // });
+    //               // setOrderId(datas.token)
+    var config = {
+             "root": "",
+             "flow": "DEFAULT",
+             "data": {
+              "orderId": TokenId,
+              "token": txnToken,
+              "tokenType": "TXN_TOKEN",
+              "amount":amounts
+             },
+             "handler": {
+                "notifyMerchant": function(eventName,data){
+                  console.log(eventName,data)
+                }
+              }
+            };
+                  window.Paytm.CheckoutJS.init(config).then(function onSuccess() {
+
+    window.Paytm.CheckoutJS.invoke();
+    }).catch(function onError(error){
+    console.log("error => ",error);
+    });
   };
 
   // onsubmit request from button
@@ -249,11 +238,13 @@ export default function Home() {
       </Head>
 
       {/* paytm script */}
-    <Script
-          src={`https://securegw-stage.paytm.in/theia/api/v1/initiateTransaction?mid=${process.env.NEXT_PUBLIC_PAYTM_MERCHANT_ID}&orderId=${TokenId}`}
-          strategy="beforeInteractive"
-        />
 
+        
+    <Script type="application/javascript" src={`https://securegw-stage.paytm.in/merchantpgpui/checkoutjs/merchants/${process.env.NEXT_PUBLIC_PAYTM_MERCHANT_ID}.js`} crossorigin="anonymous"></Script>
+ <Script
+        id="razorpay-checkout-js"
+        src="https://checkout.razorpay.com/v1/checkout.js"
+      />
       <form onSubmit={check}>
         <input
           type="number"
@@ -267,17 +258,7 @@ export default function Home() {
         {/* cards option */}
         <p id="message">Select any gateway for payment</p>
         <div className="card">
-          <li>
-            <input
-              type="radio"
-              name="paymentMethod"
-              value="ccAvenue"
-              id="ccAvenue"
-            />
-            <label htmlFor="ccAvenue">
-              <img src="ccavenue.png" alt="ccavenue" id="ccavenueImage" />
-            </label>
-          </li>
+         
 
           <li>
             <input
@@ -291,17 +272,7 @@ export default function Home() {
             </label>
           </li>
 
-          <li>
-            <input
-              type="radio"
-              name="paymentMethod"
-              value="paypal"
-              id="paypal"
-            />
-            <label htmlFor="paypal">
-              <img src="paypal.png" alt="paypal" id="paypalImg" />
-            </label>
-          </li>
+         
           <li>
             <input
               type="radio"
@@ -321,17 +292,7 @@ export default function Home() {
             </label>
           </li>
 
-          <li>
-            <input
-              type="radio"
-              name="paymentMethod"
-              value="payumoney"
-              id="payumoney"
-            />
-            <label htmlFor="payumoney">
-              <img src="payumoney.png" alt="payumoney" id="payumoneyImg" />
-            </label>
-          </li>
+         
         </div>
 
         {/* button */}

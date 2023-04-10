@@ -8,15 +8,11 @@ let HOST=process.env.NEXT_PUBLIC_API_URL;
 export default async function PreTransaction(req, res) {
   if (req.method == "POST") {
 try{
+    
 
-   
-    // "callbackUrl"   : `${HOST}/api/PaytmPostTransaction`,
-  
 let orderID=req.body.orderId;
 let amount=req.body.amount;
 let Email="surajthakurrs45@gmail.com"
-
-console.log(orderID)
 
 var paytmParams = {};
 paytmParams.body = {
@@ -24,7 +20,7 @@ paytmParams.body = {
     "mid"           : `${mid}`,
     "websiteName"   : "WEBSTAGING",
     "orderId"       : `${orderID}`,
-    "callbackUrl"   : `${HOST}/api/PostTransaction?`,
+    "callbackUrl"   : `${HOST}/api/PaytmPostTransaction`,
     "txnAmount"     : {
         "value"     : `${amount}`,
         "currency"  : "INR",
@@ -68,8 +64,7 @@ PaytmChecksum.generateSignature(JSON.stringify(paytmParams.body), `${mkey}`).the
 
         post_res.on('end', function(){
           
-let token=JSON.parse(response);
-console.log(token)
+let token=JSON.parse(response).body.txnToken;
 return res.status(200).json(token)
         });
     });

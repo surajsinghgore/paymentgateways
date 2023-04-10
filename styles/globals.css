@@ -113,11 +113,6 @@ margin-left: 3%;
 display: flex;
 }
 
-#ccavenueImage{
-width: 80px;
-height: 80px;
-margin-top: 20%;
-}
 
 #razorpayImg{
 width: 80px;
@@ -126,11 +121,7 @@ height: 40px;
 }
 
 
-#paypalImg{
-width: 80px;
-margin-top: 44%;
-height: 50px;
-}
+
 
 #stripeImg{
 width: 70px;
@@ -144,11 +135,58 @@ margin-top: 44%;
 height: 50px;
 }
 
-#payumoney{
-margin-top: -5%;
-}
-#payumoneyImg{
-width: 80px;
-height: 80px;
+
+@media screen and (max-width: 780px) {
+form{
+width: 96%;
+margin-top: 15%;
+
+margin-left: 2%;
 }
 
+form input{
+text-align: center;
+width: 80%;
+
+font-size: 7vw;
+
+}
+
+
+form button{
+
+font-size: 6vw;
+
+}
+#message{
+
+font-size: 6vw;
+
+}
+.card{
+width: 96%;
+margin-left:6%;
+display: flex;
+padding-left: 5%;
+ flex-wrap: wrap;
+}
+
+#razorpayImg{
+width: 40vw;
+margin-top: 0%;
+height: 12vh;
+}
+#stripeImg{
+width: 40vw;
+margin-top: 0%;
+height: auto;
+
+}
+
+#paytmImg{
+width: 40vw;
+margin-top: 0%;
+ height: auto;
+
+}
+}
